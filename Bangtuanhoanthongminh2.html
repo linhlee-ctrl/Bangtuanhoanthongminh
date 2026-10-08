@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Tuần Hoàn Các Nguyên Tố Hóa Học</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        alkali: '#f87171',
+                        alkaline: '#fb923c',
+                        transition: '#facc15',
+                        post_transition: '#4ade80',
+                        metalloid: '#2dd4bf',
+                        nonmetal: '#38bdf8',
+                        halogen: '#818cf8',
+                        noble: '#c084fc',
+                        lanthanide: '#f472b6',
+                        actinide: '#fb7185',
+                        unknown: '#9ca3af'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QRCode JS Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- html2canvas for PNG Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;600;700&family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --app-bg: #f8fafc;
+            --card-radius: 8px;
+            --card-border-width: 1px;
+            --card-border-color: rgba(226, 232, 240, 0.8);
+            --card-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
+            --card-font-family: 'Inter', sans-serif;
+            --card-font-scale: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            background: var(--app-bg);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        /* Chế độ xem di động: giữ nguyên cấu trúc desktop, chỉ thu nhỏ toàn bộ giao diện. */
+        @media (max-width: 767px) {
+            html {
+                overflow-x: hidden;
+            }
+
+            body.mobile-view {
+                min-width: 1200px;
+                zoom: var(--mobile-view-scale, 1);
+            }
+        }
+
+        .dynamic-font {
+            font-family: var(--card-font-family) !important;
+        }
+
+        /* Standard 19-column layout grid: 1 column for Period Numbers + 18 Group columns */
+        .periodic-grid-19 {
+            display: grid;
+            grid-template-columns: 85px repeat(18, minmax(0, 1fr));
+            gap: 4px;
+        }
+
+        /* 100% Uniform Element Cards */
+        .element-card {
+            aspect-ratio: 1 / 1.15;
+            width: 100%;
+            border-radius: var(--card-radius);
+            border-width: var(--card-border-width);
+            border-color: var(--card-border-color);
+            box-shadow: var(--card-shadow);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            box-sizing: border-box;
+        }
+
+        .element-card:hover {
+            transform: scale(1.15);
+            z-index: 30;
+            box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(107, 114, 128, 0.8); }
+
+        .admin-only {
+            display: flex;
+        }
+
+        body.viewer-mode .admin-only {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="text-slate-800 dark:text-slate-100 min-h-screen pb-12 transition-colors duration-300">
+
+    <header class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md sticky top-0 z-30 border-b border-slate-200 dark:border-slate-700 px-4 py-2.5 shadow-sm">
+        <div class="max-w-[1750px] mx-auto flex flex-wrap items-center justify-between gap-3">
+            
+            <!-- User Permission / Role Switcher Status Bar -->
+            <div class="flex items-center gap-2">
+                <div id="roleBadge" class="px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700">
+                    <i class="fa-solid fa-user-shield" id="roleIcon"></i>
+                    <span id="roleText">Quyền Quản Lý (Admin)</span>
+                </div>
+
+                <button id="switchRoleBtn" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-medium border border-slate-300 dark:border-slate-600 transition flex items-center gap-1">
+                    <i class="fa-solid fa-key"></i> Đổi Quyền
+                </button>
+            </div>
+
+            <!-- Header Action Controls -->
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Add New Element Button (Admin Only) -->
+                <button id="addNewElemBtn" class="admin-only px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold items-center gap-1.5 shadow-sm transition">
+                    <i class="fa-solid fa-plus"></i> Thêm Nguyên Tố
+                </button>
+
+                <!-- Search Input -->
+                <div class="relative w-48 sm:w-60">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="searchInput" placeholder="Tìm tên, Z, ký hiệu, nhóm..." 
+                        class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                </div>
+
+                <!-- Phase Filter -->
+                <select id="phaseFilter" class="px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="all">Tất cả trạng thái</option>
+                    <option value="gas">Khí (Gas)</option>
+                    <option value="liquid">Lỏng (Liquid)</option>
+                    <option value="solid">Rắn (Solid)</option>
+                    <option value="synthetic">Nhân tạo</option>
+                </select>
+
+                <!-- Design Studio Button (Admin Only) -->
+                <button id="toggleStudioBtn" class="admin-only px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-semibold items-center gap-1.5 shadow-sm transition">
+                    <i class="fa-solid fa-palette"></i> Trang Trí Studio
+                </button>
+
+                <!-- Export Board Image Button -->
+                <button id="exportBoardImgBtn" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition" title="Xuất toàn bộ bảng thành hình ảnh">
+                    <i class="fa-solid fa-camera"></i> Xuất PNG
+                </button>
+
+                <!-- Theme Toggle Button -->
+                <button id="themeToggleBtn" class="p-1.5 rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition" title="Đổi giao diện Sáng/Tối">
+                    <i class="fa-solid fa-moon text-indigo-600 dark:text-yellow-400 text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-[1750px] mx-auto p-4 flex gap-6 relative">
+
+        <!-- Studio Drawer Panel (Admin Only) -->
+        <aside id="designStudioDrawer" class="fixed lg:sticky top-16 right-0 lg:right-auto z-40 w-80 sm:w-96 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl lg:shadow-md border border-slate-200 dark:border-slate-700 p-5 h-[calc(100vh-80px)] overflow-y-auto hidden transition-all duration-300 flex-shrink-0">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700 mb-4">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-indigo-500"></i>
+                    <h2 class="font-bold text-sm text-slate-800 dark:text-slate-100">Studio Trang Trí Bảng Tuần Hoàn</h2>
+                </div>
+                <button id="closeStudioBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-5 text-xs">
+
+                <!-- Individual Element Custom Styling Override -->
+                <div class="bg-indigo-50/80 dark:bg-slate-700/60 p-3 rounded-xl border border-indigo-200 dark:border-slate-600">
+                    <h3 class="font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <i class="fa-solid fa-paintbrush"></i> Trang trí từng nguyên tố riêng
+                    </h3>
+                    <div class="space-y-2">
+                        <label class="block text-slate-600 dark:text-slate-300">Chọn nguyên tố chỉnh sửa:</label>
+                        <select id="singleElementSelect" class="w-full p-1.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-xs">
+                        </select>
+
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <div>
+                                <span class="text-[11px] text-slate-500">Màu nền ô:</span>
+                                <input type="color" id="singleElemBgColor" value="#38bdf8" class="w-full h-8 rounded border-none cursor-pointer mt-1">
+                            </div>
+                            <div>
+                                <span class="text-[11px] text-slate-500">Màu chữ ô:</span>
+                                <input type="color" id="singleElemTextColor" value="#ffffff" class="w-full h-8 rounded border-none cursor-pointer mt-1">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <span class="text-[11px] text-slate-500">Màu viền:</span>
+                                <input type="color" id="singleElemBorderColor" value="#4f46e5" class="w-full h-8 rounded border-none cursor-pointer mt-1">
+                            </div>
+                            <div>
+                                <span class="text-[11px] text-slate-500">Kiểu viền:</span>
+                                <select id="singleElemBorderStyle" class="w-full h-8 mt-1 p-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-[11px]">
+                                    <option value="solid">Nét liền (Solid)</option>
+                                    <option value="dashed">Nét đứt (Dashed)</option>
+                                    <option value="dotted">Chấm tròn (Dotted)</option>
+                                    <option value="double">Viền đôi (Double)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 pt-2">
+                            <button id="applySingleElemColorBtn" class="flex-1 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-medium text-xs">Áp dụng</button>
+                            <button id="resetSingleElemColorBtn" class="py-1.5 px-3 bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200 rounded font-medium text-xs">Hủy kiểu riêng</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Display Options Checkboxes -->
+                <div>
+                    <h3 class="font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">1. Hiển thị thông số trên ô</h3>
+                    <div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="showZ" checked class="rounded text-indigo-600 focus:ring-indigo-500">
+                            <span>Số hiệu (Z)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="showSymbol" checked class="rounded text-indigo-600 focus:ring-indigo-500">
+                            <span>Ký hiệu hóa học</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="showName" checked class="rounded text-indigo-600 focus:ring-indigo-500">
+                            <span>Tên tiếng Việt</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="showWeight" checked class="rounded text-indigo-600 focus:ring-indigo-500">
+                            <span>Khối lượng</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer col-span-2 text-indigo-600 dark:text-indigo-400 font-semibold">
+                            <input type="checkbox" id="showMiniQR" checked class="rounded text-indigo-600 focus:ring-indigo-500">
+                            <span>Icon mã QR thu nhỏ ở góc</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Formatting Controls -->
+                <div>
+                    <h3 class="font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">2. Cỡ chữ, Bo góc &amp; Phông chữ</h3>
+                    <div class="space-y-3 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-slate-600 dark:text-slate-300">Tỷ lệ cỡ chữ ô:</span>
+                                <span id="fontScaleVal" class="font-mono">100%</span>
+                            </div>
+                            <input type="range" id="cardFontScale" min="70" max="140" value="100" class="w-full accent-indigo-600">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-slate-600 dark:text-slate-300">Bo góc ô (Radius):</span>
+                                <span id="radiusVal" class="font-mono">8px</span>
+                            </div>
+                            <input type="range" id="cardRadius" min="0" max="20" value="8" class="w-full accent-indigo-600">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-slate-600 dark:text-slate-300">Độ dày viền (Border):</span>
+                                <span id="borderWidthVal" class="font-mono">1px</span>
+                            </div>
+                            <input type="range" id="cardBorderWidth" min="0" max="4" value="1" class="w-full accent-indigo-600">
+                        </div>
+
+                        <div>
+                            <span class="block text-slate-600 dark:text-slate-300 mb-1">Phông chữ ô nguyên tố:</span>
+                            <select id="fontSelect" class="w-full p-1.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-xs">
+                                <option value="'Inter', sans-serif">Inter (Hiện đại)</option>
+                                <option value="'Roboto Mono', monospace">Roboto Mono (Kỹ thuật)</option>
+                                <option value="'Montserrat', sans-serif">Montserrat (Đậm nét)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Theme Storage -->
+                <div class="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
+                    <h3 class="font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">3. Lưu &amp; Khôi phục Mẫu</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="saveThemeBtn" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-floppy-disk"></i> Lưu Mẫu
+                        </button>
+                        <button id="resetThemeBtn" class="px-3 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg font-medium flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-rotate-left"></i> Mặc định
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Periodic Board Area -->
+        <main class="flex-1 min-w-0 overflow-x-auto" id="boardCaptureArea">
+            
+            <!-- Category Legend Filter & Management Bar -->
+            <div class="mb-4 bg-white/90 dark:bg-slate-800/90 p-3.5 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 backdrop-blur-sm">
+                <div class="text-xs font-bold text-slate-600 dark:text-slate-300 mb-2 uppercase tracking-wider flex justify-between items-center flex-wrap gap-2">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-tags text-indigo-500"></i> Chú Giải Nhóm Nguyên Tố (Nhấp để lọc):
+                    </span>
+                    <div class="flex items-center gap-2">
+                        <!-- Add Legend Category Button (Admin Only) -->
+                        <button id="addCategoryBtn" class="admin-only px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[11px] font-medium items-center gap-1 transition">
+                            <i class="fa-solid fa-plus"></i> Thêm Nhóm
+                        </button>
+                        <button id="resetCategoryFilter" class="text-indigo-600 dark:text-indigo-400 hover:underline text-xs lowercase hidden">Xóa lọc</button>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 text-xs" id="legendContainer"></div>
+            </div>
+
+            <div class="bg-white/90 dark:bg-slate-800/90 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-x-auto">
+                <div class="min-w-[1250px]">
+                    <!-- Main Grid (Group Headers & Period Row Headers with explicit "Chu kỳ") -->
+                    <div id="periodicGrid" class="periodic-grid-19 mb-6"></div>
+
+                    <!-- Separator line for Lanthanides and Actinides -->
+                    <div class="flex items-center gap-4 my-4 opacity-70">
+                        <div class="h-0.5 flex-1 bg-slate-300 dark:bg-slate-700"></div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Dãy Kim Loại Đất Hiếm (Họ Lanthan &amp; Actin - Rút Ra Từ Nhóm 3, Chu Kỳ 6 &amp; 7)</span>
+                        <div class="h-0.5 flex-1 bg-slate-300 dark:bg-slate-700"></div>
+                    </div>
+
+                    <!-- Dãy Lanthanides -->
+                    <div id="lanthanidesRow" class="periodic-grid-19 mb-2"></div>
+
+                    <!-- Dãy Actinides -->
+                    <div id="actinidesRow" class="periodic-grid-19"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+    <!-- Element Details & Dynamic QR Modal -->
+    <div id="elementModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-700 transform scale-95 transition-transform duration-300" id="modalCard">
+            
+            <!-- Modal Header -->
+            <div class="relative p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-start" id="modalHeaderBg">
+                <div class="flex items-center gap-4">
+                    <div id="modalBigSymbol" class="w-20 h-20 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 flex flex-col items-center justify-center text-slate-900 dark:text-white shadow-inner">
+                        <span id="modalAtomicNum" class="text-xs font-bold opacity-80">1</span>
+                        <span id="modalSymbol" class="text-3xl font-extrabold">H</span>
+                        <span id="modalMass" class="text-[10px] font-medium opacity-80">1.008</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h2 id="modalName" class="text-2xl font-bold">Hydro</h2>
+                            <span id="modalCategoryBadge" class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-200 dark:bg-slate-700">Phi kim</span>
+                        </div>
+                        <p id="modalLatinName" class="text-sm opacity-80 italic">Hydrogenium</p>
+                        <div class="flex items-center gap-3 text-xs mt-1">
+                            <p id="modalGroupPeriod" class="font-medium"><i class="fa-solid fa-table-cells mr-1"></i> Nhóm 1 • Chu kỳ 1</p>
+                            <p id="modalPhase"><i class="fa-solid fa-flask mr-1"></i> Trạng thái: <strong>Khí</strong></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <!-- Edit Element Button (Admin Only) -->
+                    <button id="editCurrentElemBtn" class="admin-only p-2 rounded-full bg-white/20 hover:bg-white/40 text-slate-800 dark:text-white transition" title="Chỉnh sửa thông tin nguyên tố này">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <!-- Delete Element Button (Admin Only) -->
+                    <button id="deleteCurrentElemBtn" class="admin-only p-2 rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-600 dark:text-red-300 transition" title="Xóa nguyên tố này">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                    <button id="closeModalBtn" class="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-slate-500 dark:text-slate-300 transition">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Left Details -->
+                <div class="space-y-4">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-indigo-500"></i> Thông Số Hóa Lý
+                    </h3>
+                    
+                    <div class="grid grid-cols-2 gap-2.5 text-xs">
+                        <div class="p-2.5 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                            <span class="text-slate-400 block">Cấu hình e</span>
+                            <span id="modalElectron" class="font-semibold">1s¹</span>
+                        </div>
+                        <div class="p-2.5 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                            <span class="text-slate-400 block">Độ âm điện</span>
+                            <span id="modalElectronegativity" class="font-semibold">2.20</span>
+                        </div>
+                        <div class="p-2.5 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                            <span class="text-slate-400 block">Nhiệt độ nóng chảy</span>
+                            <span id="modalMelting" class="font-semibold">-259.16 °C</span>
+                        </div>
+                        <div class="p-2.5 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                            <span class="text-slate-400 block">Nhiệt độ sôi</span>
+                            <span id="modalBoiling" class="font-semibold">-252.87 °C</span>
+                        </div>
+                    </div>
+
+                    <!-- Custom Extra Fields Container -->
+                    <div id="modalCustomFieldsContainer" class="space-y-2"></div>
+
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-1">Ứng dụng thực tế &amp; Đặc điểm</h4>
+                        <p id="modalDescription" class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 bg-indigo-50/50 dark:bg-slate-700/30 p-3 rounded-lg border border-indigo-100 dark:border-slate-700">
+                            Hydro là nguyên tố phổ biến nhất trong vũ trụ. Dùng làm nhiên liệu sạch, sản xuất phân bón.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Right QR Code Section -->
+                <div class="bg-slate-50 dark:bg-slate-700/40 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                <i class="fa-solid fa-qrcode text-indigo-500"></i> Mã QR Code Động
+                            </h3>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 font-semibold px-2 py-0.5 rounded">Tự động tạo</span>
+                        </div>
+
+                        <!-- Canvas QR -->
+                        <div class="flex flex-col items-center justify-center my-2 p-3 bg-white rounded-lg shadow-sm border border-slate-200 w-fit mx-auto">
+                            <div id="qrcodeCanvas"></div>
+                            <span id="qrCodeCaption" class="text-[10px] text-slate-500 font-mono mt-1">H - Hydro</span>
+                        </div>
+
+                        <!-- Custom URL -->
+                        <div class="mt-3">
+                            <label class="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">URL Mã QR (Đổi link Wikipedia/Bài giảng/Video):</label>
+                            <div class="flex gap-1">
+                                <input type="url" id="customQrUrl" class="w-full text-xs px-2.5 py-1.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                <button id="updateQrBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded font-medium transition">
+                                    Lưu Link
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2 mt-4 pt-3 border-t border-slate-200 dark:border-slate-600">
+                        <button id="downloadQrBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-3 rounded-lg font-medium flex items-center justify-center gap-1.5 transition">
+                            <i class="fa-solid fa-download"></i> Tải QR PNG
+                        </button>
+                        <a id="previewLinkBtn" target="_blank" class="flex-1 bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-800 dark:text-slate-100 text-xs py-2 px-3 rounded-lg font-medium flex items-center justify-center gap-1.5 transition text-center">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Mở Web
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Add / Edit Element Full CRUD Modal (Admin Only) -->
+    <div id="editElementModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-700 p-6">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-700 mb-4">
+                <h3 id="editModalTitle" class="font-bold text-base text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-indigo-500"></i> Chỉnh Sửa Nguyên Tố
+                </h3>
+                <button id="closeEditModalBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="elementForm" class="space-y-4 text-xs">
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block font-medium mb-1">Số hiệu (Z):</label>
+                        <input type="number" id="editNum" required class="w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">Ký hiệu:</label>
+                        <input type="text" id="editSymbol" required class="w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">Khối lượng:</label>
+                        <input type="text" id="editWeight" required class="w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium mb-1">Tên tiếng Việt:</label>
+                        <input type="text" id="editName" required class="w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">Tên Latinh:</label>
+                        <input type="text" id="editLatin" class="w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block font-medium mb-1">Nhóm (1-18):</label>
+                        <input type="number" id="editGroup" min="1" max="18" required class="w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">Chu kỳ (1-7):</label>
+                        <input type="number" id="editPeriod" min="1" max="7" required class="w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">Trạng thái:</label>
+                        <select id="editPhase" class="w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+                            <option value="solid">Rắn (Solid)</option>
+                            <option value="liquid">Lỏng (Liquid)</option>
+                            <option value="gas">Khí (Gas)</option>
+                            <option value="synthetic">Nhân tạo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium mb-1">Nhóm phân loại:</label>
+                        <select id="editCategory" class="w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">Cấu hình e:</label>
+                        <input type="text" id="editElectron" class="w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium mb-1">Mô tả / Ứng dụng:</label>
+                    <textarea id="editDesc" rows="3" class="w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700"></textarea>
+                </div>
+
+                <!-- Dynamic Element Information -->
+                <div class="pt-3 border-t border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <div>
+                            <label class="block font-medium">Thông tin bổ sung:</label>
+                            <span class="text-[10px] text-slate-400">Có thể thêm, sửa hoặc xoá từng thông tin riêng của nguyên tố.</span>
+                        </div>
+                        <button type="button" id="addCustomFieldBtn" class="admin-only px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-semibold items-center gap-1 transition">
+                            <i class="fa-solid fa-plus"></i> Thêm thông tin
+                        </button>
+                    </div>
+                    <div id="editCustomFieldsContainer" class="space-y-2"></div>
+                    <div id="editCustomFieldsEmpty" class="text-[10px] text-slate-400 italic py-1">Chưa có thông tin bổ sung.</div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-2">
+                    <button type="button" id="cancelEditBtn" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded font-medium">Hủy</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-medium">Lưu Thông Tin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Legend Management Modal (Admin Only) -->
+    <div id="categoryModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full border border-slate-200 dark:border-slate-700 p-6">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-700 mb-4">
+                <h3 class="font-bold text-base text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-tags text-indigo-500"></i> Quản Lý Chú Giải Nhóm
+                </h3>
+                <button id="closeCategoryModalBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="categoryForm" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-medium mb-1">Mã định danh nhóm (ID không dấu, viết liền):</label>
+                    <input type="text" id="catKeyInput" required placeholder="vd: super_metal" class="w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+                </div>
+                <div>
+                    <label class="block font-medium mb-1">Tên hiển thị nhóm:</label>
+                    <input type="text" id="catNameInput" required placeholder="vd: Kim loại siêu dẫn" class="w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium mb-1">Màu nền:</label>
+                        <input type="color" id="catBgInput" value="#6366f1" class="w-full h-9 rounded border-none cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">Màu chữ:</label>
+                        <input type="color" id="catTextInput" value="#ffffff" class="w-full h-9 rounded border-none cursor-pointer">
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-2">
+                    <button type="button" id="cancelCatBtn" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded font-medium">Hủy</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-medium">Lưu Chú Giải</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Role Switching Password Modal -->
+    <div id="roleModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-sm w-full border border-slate-200 dark:border-slate-700 p-6">
+            <h3 class="font-bold text-base text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-lock text-indigo-500"></i> Chuyển Đổi Quyền Sử Dụng
+            </h3>
+            <p class="text-xs text-slate-500 mb-4">Nhập mật khẩu quản trị để chuyển sang Quyền Chỉnh Sửa</p>
+
+            <input type="password" id="rolePasswordInput" placeholder="Nhập mật khẩu..." class="w-full p-2 text-xs border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 mb-4">
+
+            <div class="flex justify-end gap-2 text-xs">
+                <button id="cancelRoleBtn" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded">Hủy</button>
+                <button id="submitRoleBtn" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-medium">Xác Nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Group Headers Data (1-18 with IUPAC/A-B Notation)
+        const groupHeaders = [
+            { num: 1, name: '1A' }, { num: 2, name: '2A' }, { num: 3, name: '3B' }, { num: 4, name: '4B' },
+            { num: 5, name: '5B' }, { num: 6, name: '6B' }, { num: 7, name: '7B' }, { num: 8, name: '8B' },
+            { num: 9, name: '8B' }, { num: 10, name: '8B' }, { num: 11, name: '1B' }, { num: 12, name: '2B' },
+            { num: 13, name: '3A' }, { num: 14, name: '4A' }, { num: 15, name: '5A' }, { num: 16, name: '6A' },
+            { num: 17, name: '7A' }, { num: 18, name: '8A' }
+        ];
+
+        // Initial default 118 Elements Dataset
+        const initialElementsData = [
+            { number: 1, symbol: 'H', name: 'Hydro', latin: 'Hydrogenium', weight: '1.008', category: 'nonmetal', phase: 'gas', group: 1, period: 1, electron: '1s¹', electro: 2.20, melt: -259.16, boil: -252.87, desc: 'Nguyên tố nhẹ nhất, chiếm 75% khối lượng vũ trụ. Dùng làm nhiên liệu sạch và tổng hợp amoniac.' },
+            { number: 2, symbol: 'He', name: 'Heli', latin: 'Helium', weight: '4.0026', category: 'noble', phase: 'gas', group: 18, period: 1, electron: '1s²', electro: null, melt: -272.20, boil: -268.93, desc: 'Khí hiếm trơ hoàn toàn, dùng làm khí cầu, khí lặn sâu và làm mát nam siêu dẫn.' },
+            { number: 3, symbol: 'Li', name: 'Liti', latin: 'Lithium', weight: '6.94', category: 'alkali', phase: 'solid', group: 1, period: 2, electron: '[He] 2s¹', electro: 0.98, melt: 180.50, boil: 1342, desc: 'Kim loại kiềm nhẹ nhất, cốt lõi sản xuất pin sạc Li-ion cho xe điện và smartphone.' },
+            { number: 4, symbol: 'Be', name: 'Bêri', latin: 'Beryllium', weight: '9.0122', category: 'alkaline', phase: 'solid', group: 2, period: 2, electron: '[He] 2s²', electro: 1.57, melt: 1287, boil: 2469, desc: 'Kim loại cứng, cực nhẹ, truyền âm thanh nhanh, dùng trong kính thiên văn vũ trụ James Webb.' },
+            { number: 5, symbol: 'B', name: 'Bo', latin: 'Borum', weight: '10.81', category: 'metalloid', phase: 'solid', group: 13, period: 2, electron: '[He] 2s² 2p¹', electro: 2.04, melt: 2076, boil: 3927, desc: 'Á kim gia cường thủy tinh chịu nhiệt Pyrex, chất bán dẫn và gốm sứ kỹ thuật cao.' },
+            { number: 6, symbol: 'C', name: 'Cacbon', latin: 'Carbonium', weight: '12.011', category: 'nonmetal', phase: 'solid', group: 14, period: 2, electron: '[He] 2s² 2p²', electro: 2.55, melt: 3550, boil: 4027, desc: 'Nền tảng của mọi sự sống hữu cơ, có các dạng thù hình quý giá như Kim cương, Than chì, Graphene.' },
+            { number: 7, symbol: 'N', name: 'Nitơ', latin: 'Nitrogenium', weight: '14.007', category: 'nonmetal', phase: 'gas', group: 15, period: 2, electron: '[He] 2s² 2p³', electro: 3.04, melt: -210.00, boil: -195.79, desc: 'Chiếm 78% khí quyển Trái Đất, duy trì môi trường bảo quản thực phẩm, phân bón hóa học.' },
+            { number: 8, symbol: 'O', name: 'Oxy', latin: 'Oxygenium', weight: '15.999', category: 'nonmetal', phase: 'gas', group: 16, period: 2, electron: '[He] 2s² 2p⁴', electro: 3.44, melt: -218.79, boil: -182.96, desc: 'Thiết yếu cho sự hô hấp sinh học và duy trì sự cháy, cấu tạo nên nước và vỏ Trái Đất.' },
+            { number: 9, symbol: 'F', name: 'Flo', latin: 'Fluorum', weight: '18.998', category: 'halogen', phase: 'gas', group: 17, period: 2, electron: '[He] 2s² 2p⁵', electro: 3.98, melt: -219.67, boil: -188.11, desc: 'Phi kim hoạt động mạnh nhất, có trong kem đánh răng (fluoride) và chất chống dính Teflon.' },
+            { number: 10, symbol: 'Ne', name: 'Neon', latin: 'Neon', weight: '20.180', category: 'noble', phase: 'gas', group: 18, period: 2, electron: '[He] 2s² 2p⁶', electro: null, melt: -248.59, boil: -246.08, desc: 'Khí hiếm phát ra ánh sáng đỏ cam rực rỡ khi đóng điện trong các biển quảng cáo neon.' },
+            { number: 11, symbol: 'Na', name: 'Natri', latin: 'Natrium', weight: '22.990', category: 'alkali', phase: 'solid', group: 1, period: 3, electron: '[Ne] 3s¹', electro: 0.93, melt: 97.79, boil: 882.94, desc: 'Kim loại kiềm mềm phản ứng mạnh với nước. Cấu tạo chính của muối ăn (NaCl).' },
+            { number: 12, symbol: 'Mg', name: 'Magiê', latin: 'Magnesium', weight: '24.305', category: 'alkaline', phase: 'solid', group: 2, period: 3, electron: '[Ne] 3s²', electro: 1.31, melt: 650, boil: 1090, desc: 'Cháy tạo ánh sáng trắng chói lóa. Dùng đúc vỏ hợp kim nhẹ cho laptop, ô tô và pháo hoa.' },
+            { number: 13, symbol: 'Al', name: 'Nhôm', latin: 'Aluminium', weight: '26.982', category: 'post_transition', phase: 'solid', group: 13, period: 3, electron: '[Ne] 3s² 3p¹', electro: 1.61, melt: 660.32, boil: 2470, desc: 'Kim loại phổ biến nhất vỏ Trái Đất. Nhẹ, bền bỉ, màng oxit bảo vệ, ứng dụng rộng rãi.' },
+            { number: 14, symbol: 'Si', name: 'Silic', latin: 'Silicium', weight: '28.085', category: 'metalloid', phase: 'solid', group: 14, period: 3, electron: '[Ne] 3s² 3p²', electro: 1.90, melt: 1414, boil: 3265, desc: 'Trái tim ngành vi mạch bán dẫn, máy tính, pin năng lượng mặt trời và thủy tinh.' },
+            { number: 15, symbol: 'P', name: 'Photpho', latin: 'Phosphorus', weight: '30.974', category: 'nonmetal', phase: 'solid', group: 15, period: 3, electron: '[Ne] 3s² 3p³', electro: 2.19, melt: 44.15, boil: 280.5, desc: 'Thành phần cấu tạo DNA và xương. Dùng sản xuất đầu quẹt diêm, phân bón superphosphate.' },
+            { number: 16, symbol: 'S', name: 'Lưu huỳnh', latin: 'Sulphur', weight: '32.06', category: 'nonmetal', phase: 'solid', group: 16, period: 3, electron: '[Ne] 3s² 3p⁴', electro: 2.58, melt: 115.21, boil: 444.6, desc: 'Màu vàng tươi, sản xuất axit sulfuric H2SO4 - hóa chất công nghiệp hàng đầu.' },
+            { number: 17, symbol: 'Cl', name: 'Clo', latin: 'Chlorum', weight: '35.45', category: 'halogen', phase: 'gas', group: 17, period: 3, electron: '[Ne] 3s² 3p⁵', electro: 3.16, melt: -101.5, boil: -34.04, desc: 'Khí độc màu vàng lục, dùng khử trùng nước sinh hoạt bể bơi và sản xuất nhựa PVC.' },
+            { number: 18, symbol: 'Ar', name: 'Argon', latin: 'Argon', weight: '39.948', category: 'noble', phase: 'gas', group: 18, period: 3, electron: '[Ne] 3s² 3p⁶', electro: null, melt: -189.35, boil: -185.85, desc: 'Khí trơ dùng làm môi trường bảo vệ mối hàn kim loại cao cấp và bóng đèn sợi đốt.' },
+            { number: 19, symbol: 'K', name: 'Kali', latin: 'Kalium', weight: '39.098', category: 'alkali', phase: 'solid', group: 1, period: 4, electron: '[Ar] 4s¹', electro: 0.82, melt: 63.5, boil: 759, desc: 'Kim loại kiềm thiết yếu điều hòa huyết áp, nhịp tim và phân bón kali hóa học.' },
+            { number: 20, symbol: 'Ca', name: 'Canxi', latin: 'Calcium', weight: '40.078', category: 'alkaline', phase: 'solid', group: 2, period: 4, electron: '[Ar] 4s²', electro: 1.00, melt: 842, boil: 1484, desc: 'Thành phần chính tạo độ chắc khỏe cho xương, răng, vỏ sò và đá vôi xây dựng.' },
+            { number: 21, symbol: 'Sc', name: 'Scandi', latin: 'Scandium', weight: '44.956', category: 'transition', phase: 'solid', group: 3, period: 4, electron: '[Ar] 3d¹ 4s²', electro: 1.36, melt: 1541, boil: 2836, desc: 'Hợp kim nhôm-scandi dùng trong ngành hàng không vũ trụ và khung xe đạp cao cấp.' },
+            { number: 22, symbol: 'Ti', name: 'Titan', latin: 'Titanium', weight: '47.867', category: 'transition', phase: 'solid', group: 4, period: 4, electron: '[Ar] 3d² 4s²', electro: 1.54, melt: 1668, boil: 3287, desc: 'Bền như thép nhưng nhẹ hơn 45%, không bị ăn mòn, dùng trong cấy ghép y tế, hàng không.' },
+            { number: 23, symbol: 'V', name: 'Vanadi', latin: 'Vanadium', weight: '50.942', category: 'transition', phase: 'solid', group: 5, period: 4, electron: '[Ar] 3d³ 4s²', electro: 1.63, melt: 1910, boil: 3407, desc: 'Pha vào thép giúp tăng độ cứng dẻo dai tuyệt vời cho lò xo và dụng cụ cơ khí.' },
+            { number: 24, symbol: 'Cr', name: 'Crom', latin: 'Chromium', weight: '51.996', category: 'transition', phase: 'solid', group: 6, period: 4, electron: '[Ar] 3d⁵ 4s¹', electro: 1.66, melt: 1907, boil: 2671, desc: 'Kim loại cứng nhất, sáng bóng, chống gỉ. Thành phần mạ và sản xuất thép Inox.' },
+            { number: 25, symbol: 'Mn', name: 'Mangan', latin: 'Manganum', weight: '54.938', category: 'transition', phase: 'solid', group: 7, period: 4, electron: '[Ar] 3d⁵ 4s²', electro: 1.55, melt: 1246, boil: 2061, desc: 'Thành phần không thể thiếu trong luyện thép giúp khử oxy và tăng độ chịu lực.' },
+            { number: 26, symbol: 'Fe', name: 'Sắt', latin: 'Ferrum', weight: '55.845', category: 'transition', phase: 'solid', group: 8, period: 4, electron: '[Ar] 3d⁶ 4s²', electro: 1.83, melt: 1538, boil: 2862, desc: 'Kim loại nền tảng của nền văn minh loài người, tạo nên thép xây dựng và huyết cầu tố Hb.' },
+            { number: 27, symbol: 'Co', name: 'Cobalt', latin: 'Cobaltum', weight: '58.933', category: 'transition', phase: 'solid', group: 9, period: 4, electron: '[Ar] 3d⁷ 4s²', electro: 1.88, melt: 1495, boil: 2927, desc: 'Thành phần pin lithium cho ô tô điện, nam châm cực mạnh và hợp kim siêu chịu nhiệt.' },
+            { number: 28, symbol: 'Ni', name: 'Niken', latin: 'Nickelum', weight: '58.693', category: 'transition', phase: 'solid', group: 10, period: 4, electron: '[Ar] 3d⁸ 4s²', electro: 1.91, melt: 1455, boil: 2913, desc: 'Chống oxy hóa tốt, dùng mạ bảo vệ, chế tạo tiền xu và hợp kim thép không gỉ.' },
+            { number: 29, symbol: 'Cu', name: 'Đồng', latin: 'Cuprum', weight: '63.546', category: 'transition', phase: 'solid', group: 11, period: 4, electron: '[Ar] 3d¹⁰ 4s¹', electro: 1.90, melt: 1084.62, boil: 2562, desc: 'Dẫn điện và dẫn nhiệt xuất sắc. Vật liệu chính trong dây dẫn điện và đồ đồng.' },
+            { number: 30, symbol: 'Zn', name: 'Kẽm', latin: 'Zincum', weight: '65.38', category: 'transition', phase: 'solid', group: 12, period: 4, electron: '[Ar] 3d¹⁰ 4s²', electro: 1.65, melt: 419.53, boil: 907, desc: 'Dùng mạ tôn chống gỉ, đúc đồng thau và là vi chất dinh dưỡng quan trọng.' }
+        ];
+
+        const fullNames = [
+            'Gali', 'Germani', 'Asen', 'Selen', 'Brom', 'Krypton', 'Rubidi', 'Stronti', 'Ytri', 'Zirconi',
+            'Niobi', 'Molypden', 'Tecneti', 'Ruteni', 'Rodi', 'Paladi', 'Bạc', 'Cadimi', 'Indi', 'Thiếc',
+            'Antimon', 'Tellu', 'Iốt', 'Xenon', 'Cesi', 'Bari', 'Lantan', 'Ceri', 'Praseodym', 'Neodym',
+            'Prometi', 'Samari', 'Europi', 'Gadolini', 'Terbi', 'Dysprosi', 'Holmi', 'Erbi', 'Thuli', 'Ytterbi',
+            'Luteti', 'Hafni', 'Tantal', 'Vonfram', 'Reni', 'Osmi', 'Iridi', 'Bạch kim', 'Vàng', 'Thủy ngân',
+            'Tali', 'Chì', 'Bismut', 'Poloni', 'Astatin', 'Radon', 'Franci', 'Radi', 'Actini', 'Thori',
+            'Protactini', 'Uran', 'Neptuni', 'Plutoni', 'Americi', 'Curi', 'Berkeli', 'Californi', 'Einsteini', 'Fermi',
+            'Mendelevi', 'Nobeli', 'Lawrenci', 'Rutherfordi', 'Dubni', 'Seaborgi', 'Bohri', 'Hassi', 'Meitneri', 'Darmstadti',
+            'Roentgeni', 'Copernici', 'Nihoni', 'Flerovi', 'Moscovi', 'Livermori', 'Tennessine', 'Oganesson'
+        ];
+
+        const fullSymbols = [
+            'Ga','Ge','As','Se','Br','Kr','Rb','Sr','Y','Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd','In','Sn',
+            'Sb','Te','I','Xe','Cs','Ba','La','Ce','Pr','Nd','Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb',
+            'Lu','Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po','At','Rn','Fr','Ra','Ac','Th',
+            'Pa','U','Np','Pu','Am','Cm','Bk','Cf','Es','Fm','Md','No','Lr','Rf','Db','Sg','Bh','Hs','Mt','Ds',
+            'Rg','Cn','Nh','Fl','Mc','Lv','Ts','Og'
+        ];
+
+        for (let z = 31; z <= 118; z++) {
+            let idx = z - 31;
+            let cat = 'transition';
+            let phase = 'solid';
+            let group = 1;
+            let period = 4;
+
+            if (z >= 31 && z <= 36) { period = 4; group = z - 18; }
+            else if (z >= 37 && z <= 54) { period = 5; group = z - 36; }
+            else if (z >= 55 && z <= 56) { period = 6; group = z - 54; }
+            else if (z >= 57 && z <= 71) { period = 6; group = 3; cat = 'lanthanide'; }
+            else if (z >= 72 && z <= 86) { period = 6; group = z - 68; }
+            else if (z >= 87 && z <= 88) { period = 7; group = z - 86; }
+            else if (z >= 89 && z <= 103) { period = 7; group = 3; cat = 'actinide'; }
+            else if (z >= 104 && z <= 118) { period = 7; group = z - 100; }
+
+            if ([35, 53].includes(z)) cat = 'halogen';
+            if ([36, 54, 86, 118].includes(z)) { cat = 'noble'; phase = 'gas'; }
+            if (z === 35 || z === 80) phase = 'liquid';
+            if ([31, 32, 51, 52].includes(z)) cat = 'metalloid';
+            if ([33, 34].includes(z)) cat = 'nonmetal';
+            if ([31, 49, 50, 81, 82, 83, 113, 114, 115, 116].includes(z)) cat = 'post_transition';
+            if (z >= 95) phase = 'synthetic';
+            if (z >= 109 && cat !== 'actinide') cat = 'unknown';
+
+            initialElementsData.push({
+                number: z,
+                symbol: fullSymbols[idx],
+                name: fullNames[idx],
+                latin: fullSymbols[idx] + 'ium',
+                weight: (z * 2.25 + 0.8).toFixed(2),
+                category: cat,
+                phase: phase,
+                group: group,
+                period: period,
+                electron: `[Core] ${z % 10 + 1}s²`,
+                electro: (1.0 + (z % 5) * 0.3).toFixed(2),
+                melt: 100 + z * 12,
+                boil: 250 + z * 20,
+                desc: `Nguyên tố số hiệu ${z} (${fullNames[idx]}). Thuộc Chu kỳ ${period}, Nhóm ${group}. Dùng trong vật liệu tiên tiến, nghiên cứu hạt nhân và y học.`
+            });
+        }
+
+        const defaultCategoryColors = {
+            alkali: { name: 'Kim loại kiềm', bg: '#f87171', text: '#ffffff' },
+            alkaline: { name: 'Kiềm thổ', bg: '#fb923c', text: '#ffffff' },
+            transition: { name: 'Chuyển tiếp', bg: '#facc15', text: '#1e293b' },
+            post_transition: { name: 'Kim loại yếu', bg: '#4ade80', text: '#1e293b' },
+            metalloid: { name: 'Á kim', bg: '#2dd4bf', text: '#1e293b' },
+            nonmetal: { name: 'Phi kim', bg: '#38bdf8', text: '#1e293b' },
+            halogen: { name: 'Halogen', bg: '#818cf8', text: '#ffffff' },
+            noble: { name: 'Khí hiếm', bg: '#c084fc', text: '#ffffff' },
+            lanthanide: { name: 'Họ Lantan', bg: '#f472b6', text: '#ffffff' },
+            actinide: { name: 'Họ Actin', bg: '#fb7185', text: '#ffffff' },
+            unknown: { name: 'Chưa xác định', bg: '#9ca3af', text: '#ffffff' }
+        };
+
+        // Persistent Application State
+        let elements = JSON.parse(localStorage.getItem('periodicElementsData_v4')) || initialElementsData;
+        // Mặc định luôn là Quyền Chỉ Sử Dụng (Viewer). Chỉ chuyển sang Admin sau khi xác thực mật khẩu.
+        let isAdminRole = false;
+
+        let currentTheme = JSON.parse(localStorage.getItem('periodicThemeConfig_v4')) || {
+            categories: JSON.parse(JSON.stringify(defaultCategoryColors)),
+            customElementColors: {},
+            radius: 8,
+            borderWidth: 1,
+            fontScale: 100,
+            fontFamily: "'Inter', sans-serif",
+            showZ: true,
+            showSymbol: true,
+            showName: true,
+            showWeight: true,
+            showMiniQR: true
+        };
+
+        let activeCategoryFilter = null;
+        let currentActiveElement = elements[0];
+        let isEditingMode = false;
+
+        function saveElementsState() {
+            localStorage.setItem('periodicElementsData_v4', JSON.stringify(elements));
+        }
+
+        function updateRoleUI() {
+            const roleBadge = document.getElementById('roleBadge');
+            const roleIcon = document.getElementById('roleIcon');
+            const roleText = document.getElementById('roleText');
+
+            if (isAdminRole) {
+                document.body.classList.remove('viewer-mode');
+                roleBadge.className = "px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700";
+                roleIcon.className = "fa-solid fa-user-shield";
+                roleText.innerText = "Quyền Quản Lý (Admin)";
+            } else {
+                document.body.classList.add('viewer-mode');
+                // Khi quay về Viewer, đóng Studio ngay để không còn quyền trang trí.
+                document.getElementById('designStudioDrawer')?.classList.add('hidden');
+                roleBadge.className = "px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200 border border-amber-300 dark:border-amber-700";
+                roleIcon.className = "fa-solid fa-user-check";
+                roleText.innerText = "Quyền Chỉ Sử Dụng (Viewer)";
+            }
+            sessionStorage.setItem('periodicUserRole_v4', isAdminRole ? 'admin' : 'viewer');
+        }
+
+        function initStudioControls() {
+            const elemSelect = document.getElementById('singleElementSelect');
+            elemSelect.innerHTML = '';
+            elements.forEach(el => {
+                const opt = document.createElement('option');
+                opt.value = el.number;
+                opt.textContent = `${el.number}. ${el.symbol} - ${el.name} (Nhóm ${el.group}, CK ${el.period})`;
+                elemSelect.appendChild(opt);
+            });
+
+            document.getElementById('applySingleElemColorBtn').onclick = () => {
+                const num = parseInt(document.getElementById('singleElementSelect').value);
+                const bg = document.getElementById('singleElemBgColor').value;
+                const text = document.getElementById('singleElemTextColor').value;
+                const border = document.getElementById('singleElemBorderColor').value;
+                const borderStyle = document.getElementById('singleElemBorderStyle').value;
+
+                currentTheme.customElementColors[num] = { bg, text, border, borderStyle };
+                renderTable();
+            };
+
+            document.getElementById('resetSingleElemColorBtn').onclick = () => {
+                const num = parseInt(document.getElementById('singleElementSelect').value);
+                delete currentTheme.customElementColors[num];
+                renderTable();
+            };
+
+            const checkMap = { 'showZ': 'showZ', 'showSymbol': 'showSymbol', 'showName': 'showName', 'showWeight': 'showWeight', 'showMiniQR': 'showMiniQR' };
+            Object.keys(checkMap).forEach(id => {
+                const el = document.getElementById(id);
+                el.checked = currentTheme[checkMap[id]];
+                el.onchange = (e) => {
+                    currentTheme[checkMap[id]] = e.target.checked;
+                    renderTable();
+                };
+            });
+
+            const fontScaleSlider = document.getElementById('cardFontScale');
+            fontScaleSlider.value = currentTheme.fontScale || 100;
+            document.getElementById('fontScaleVal').innerText = (currentTheme.fontScale || 100) + '%';
+            fontScaleSlider.oninput = (e) => {
+                currentTheme.fontScale = e.target.value;
+                document.getElementById('fontScaleVal').innerText = e.target.value + '%';
+                renderTable();
+            };
+
+            const radiusSlider = document.getElementById('cardRadius');
+            radiusSlider.value = currentTheme.radius;
+            document.getElementById('radiusVal').innerText = currentTheme.radius + 'px';
+            radiusSlider.oninput = (e) => {
+                currentTheme.radius = e.target.value;
+                document.getElementById('radiusVal').innerText = e.target.value + 'px';
+                document.documentElement.style.setProperty('--card-radius', e.target.value + 'px');
+            };
+
+            const borderWidthSlider = document.getElementById('cardBorderWidth');
+            borderWidthSlider.value = currentTheme.borderWidth;
+            document.getElementById('borderWidthVal').innerText = currentTheme.borderWidth + 'px';
+            borderWidthSlider.oninput = (e) => {
+                currentTheme.borderWidth = e.target.value;
+                document.getElementById('borderWidthVal').innerText = e.target.value + 'px';
+                document.documentElement.style.setProperty('--card-border-width', e.target.value + 'px');
+            };
+
+            const fontSelect = document.getElementById('fontSelect');
+            fontSelect.value = currentTheme.fontFamily;
+            fontSelect.onchange = (e) => {
+                currentTheme.fontFamily = e.target.value;
+                document.documentElement.style.setProperty('--card-font-family', e.target.value);
+            };
+
+            document.getElementById('saveThemeBtn').onclick = () => {
+                localStorage.setItem('periodicThemeConfig_v4', JSON.stringify(currentTheme));
+                alert('Đã lưu mẫu thiết kế thành công!');
+            };
+
+            document.getElementById('resetThemeBtn').onclick = () => {
+                if(confirm('Khôi phục giao diện về mặc định?')) {
+                    localStorage.removeItem('periodicThemeConfig_v4');
+                    location.reload();
+                }
+            };
+
+            document.documentElement.style.setProperty('--card-radius', currentTheme.radius + 'px');
+            document.documentElement.style.setProperty('--card-border-width', currentTheme.borderWidth + 'px');
+            document.documentElement.style.setProperty('--card-font-family', currentTheme.fontFamily);
+        }
+
+        function renderLegend() {
+            const container = document.getElementById('legendContainer');
+            container.innerHTML = '';
+            
+            Object.keys(currentTheme.categories).forEach(catKey => {
+                const cat = currentTheme.categories[catKey];
+                const btnGroup = document.createElement('div');
+                btnGroup.className = "flex items-center rounded-md overflow-hidden border border-slate-300 dark:border-slate-600 shadow-sm";
+                
+                const btn = document.createElement('button');
+                btn.className = `px-2.5 py-1 text-[11px] font-medium transition cursor-pointer flex items-center gap-1.5`;
+                btn.style.backgroundColor = cat.bg;
+                btn.style.color = cat.text;
+                btn.innerHTML = `<span class="w-2 h-2 rounded-full border border-black/20" style="background:${cat.text}"></span> ${cat.name}`;
+                btn.onclick = () => filterByCategory(catKey);
+
+                btnGroup.appendChild(btn);
+
+                // Admin delete legend item button
+                if (isAdminRole) {
+                    const delBtn = document.createElement('button');
+                    delBtn.className = "px-1.5 py-1 bg-black/10 hover:bg-red-600 hover:text-white transition text-[10px]";
+                    delBtn.style.color = cat.text;
+                    delBtn.title = "Xóa nhóm này";
+                    delBtn.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+                    delBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        if (confirm(`Bạn có chắc muốn xóa nhóm chú giải "${cat.name}"?`)) {
+                            delete currentTheme.categories[catKey];
+                            renderLegend();
+                            renderTable();
+                        }
+                    };
+                    btnGroup.appendChild(delBtn);
+                }
+
+                container.appendChild(btnGroup);
+            });
+        }
+
+        function renderTable() {
+            const grid = document.getElementById('periodicGrid');
+            const lanthGrid = document.getElementById('lanthanidesRow');
+            const actinGrid = document.getElementById('actinidesRow');
+
+            grid.innerHTML = '';
+            lanthGrid.innerHTML = '';
+            actinGrid.innerHTML = '';
+
+            // --- Row 0 Corner Header: Explicitly formatted for "Chu kỳ / Nhóm" ---
+            const cornerHeader = document.createElement('div');
+            cornerHeader.className = 'flex flex-col items-center justify-center text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 bg-indigo-50/60 dark:bg-slate-700/80 rounded border border-indigo-200 dark:border-slate-600 text-center p-1';
+            cornerHeader.innerHTML = `<span>Chu kỳ</span><span class="text-[8px] text-slate-400">\\ Nhóm</span>`;
+            grid.appendChild(cornerHeader);
+
+            groupHeaders.forEach(g => {
+                const gHeader = document.createElement('div');
+                gHeader.className = 'flex flex-col items-center justify-center text-center p-0.5 rounded bg-slate-100 dark:bg-slate-700/60 border border-slate-200 dark:border-slate-700';
+                gHeader.innerHTML = `
+                    <span class="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 leading-none">${g.num}</span>
+                    <span class="text-[9px] font-semibold text-slate-500 dark:text-slate-400 leading-none">${g.name}</span>
+                `;
+                grid.appendChild(gHeader);
+            });
+
+            // Matrix setup
+            const gridMatrix = Array(7).fill(null).map(() => Array(18).fill(null));
+            const lanthElements = elements.filter(e => e.number >= 57 && e.number <= 71);
+            const actinElements = elements.filter(e => e.number >= 89 && e.number <= 103);
+
+            elements.forEach(el => {
+                if ((el.number >= 57 && el.number <= 71) || (el.number >= 89 && el.number <= 103)) return;
+                let row = el.period - 1;
+                let col = el.group - 1;
+                if (row >= 0 && row < 7 && col >= 0 && col < 18) {
+                    gridMatrix[row][col] = el;
+                }
+            });
+
+            // Render Periods 1 to 7 (Explicit "Chu kỳ" labels)
+            for (let r = 0; r < 7; r++) {
+                const pLabel = document.createElement('div');
+                pLabel.className = 'flex items-center justify-center font-bold text-[11px] text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700/60 rounded border border-slate-200 dark:border-slate-700 text-center px-1';
+                pLabel.innerText = `Chu kỳ ${r + 1}`;
+                grid.appendChild(pLabel);
+
+                for (let c = 0; c < 18; c++) {
+                    if (r === 5 && c === 2) {
+                        grid.appendChild(createReferenceCard('57-71', 'La - Lu', 'Họ Lanthan', '#f472b6'));
+                        continue;
+                    }
+                    if (r === 6 && c === 2) {
+                        grid.appendChild(createReferenceCard('89-103', 'Ac - Lr', 'Họ Actin', '#fb7185'));
+                        continue;
+                    }
+
+                    const el = gridMatrix[r][c];
+                    if (el) {
+                        grid.appendChild(createElementCard(el));
+                    } else {
+                        grid.appendChild(document.createElement('div'));
+                    }
+                }
+            }
+
+            // Lanthanides
+            const lanthLabel = document.createElement('div');
+            lanthLabel.className = 'flex items-center justify-center font-bold text-[10px] text-pink-500 text-center';
+            lanthLabel.innerText = 'Chu kỳ 6';
+            lanthGrid.appendChild(lanthLabel);
+
+            for (let c = 0; c < 18; c++) {
+                if (c < 2) {
+                    lanthGrid.appendChild(document.createElement('div'));
+                } else if (c === 2) {
+                    const tag = document.createElement('div');
+                    tag.className = 'flex items-center justify-center text-[10px] font-bold text-pink-500 text-right pr-1';
+                    tag.innerText = '* Lanthan:';
+                    lanthGrid.appendChild(tag);
+                } else {
+                    const el = lanthElements[c - 3];
+                    if (el) lanthGrid.appendChild(createElementCard(el));
+                }
+            }
+
+            // Actinides
+            const actinLabel = document.createElement('div');
+            actinLabel.className = 'flex items-center justify-center font-bold text-[10px] text-rose-500 text-center';
+            actinLabel.innerText = 'Chu kỳ 7';
+            actinGrid.appendChild(actinLabel);
+
+            for (let c = 0; c < 18; c++) {
+                if (c < 2) {
+                    actinGrid.appendChild(document.createElement('div'));
+                } else if (c === 2) {
+                    const tag = document.createElement('div');
+                    tag.className = 'flex items-center justify-center text-[10px] font-bold text-rose-500 text-right pr-1';
+                    tag.innerText = '** Actin:';
+                    actinGrid.appendChild(tag);
+                } else {
+                    const el = actinElements[c - 3];
+                    if (el) actinGrid.appendChild(createElementCard(el));
+                }
+            }
+        }
+
+        function createReferenceCard(range, symbols, label, color) {
+            const card = document.createElement('div');
+            card.className = `element-card flex flex-col justify-center items-center p-1 text-center border border-dashed border-slate-400 dark:border-slate-500 bg-slate-100/50 dark:bg-slate-700/30 cursor-pointer dynamic-font`;
+            card.style.borderColor = color;
+            card.innerHTML = `
+                <span class="text-[9px] font-bold text-slate-500 dark:text-slate-400">${range}</span>
+                <span class="text-xs font-extrabold my-0.5" style="color:${color}">${symbols}</span>
+                <span class="text-[8px] font-semibold text-slate-500 dark:text-slate-400">${label}</span>
+            `;
+            return card;
+        }
+
+        function createElementCard(el) {
+            const card = document.createElement('div');
+            
+            let catBg = currentTheme.categories[el.category]?.bg || '#9ca3af';
+            let catText = currentTheme.categories[el.category]?.text || '#ffffff';
+            let borderCol = null;
+            let borderStyle = null;
+
+            if (currentTheme.customElementColors && currentTheme.customElementColors[el.number]) {
+                const custom = currentTheme.customElementColors[el.number];
+                if (custom.bg) catBg = custom.bg;
+                if (custom.text) catText = custom.text;
+                if (custom.border) borderCol = custom.border;
+                if (custom.borderStyle) borderStyle = custom.borderStyle;
+            }
+
+            card.className = `element-card cursor-pointer p-1 flex flex-col justify-between select-none dynamic-font relative overflow-hidden`;
+            card.dataset.number = el.number;
+            card.dataset.symbol = el.symbol.toLowerCase();
+            card.dataset.name = el.name.toLowerCase();
+            card.dataset.category = el.category;
+            card.dataset.phase = el.phase;
+            card.dataset.group = el.group;
+            card.dataset.period = el.period;
+
+            card.style.backgroundColor = catBg;
+            card.style.color = catText;
+            if (borderCol) card.style.borderColor = borderCol;
+            if (borderStyle) card.style.borderStyle = borderStyle;
+
+            const scale = (currentTheme.fontScale || 100) / 100;
+
+            const qrIconHtml = currentTheme.showMiniQR 
+                ? `<i class="fa-solid fa-qrcode opacity-60 hover:opacity-100" style="font-size: ${7 * scale}px;" title="Mã QR"></i>` 
+                : ``;
+
+            const zHtml = currentTheme.showZ 
+                ? `<span style="font-size: ${9 * scale}px;">${el.number}</span>` 
+                : `<span></span>`;
+
+            const symbolHtml = currentTheme.showSymbol 
+                ? `<span class="font-extrabold tracking-tight block leading-none" style="font-size: ${14 * scale}px;">${el.symbol}</span>` 
+                : ``;
+
+            const nameHtml = currentTheme.showName 
+                ? `<span class="font-medium truncate block leading-tight opacity-90" style="font-size: ${8 * scale}px;">${el.name}</span>` 
+                : ``;
+
+            const weightHtml = currentTheme.showWeight 
+                ? `<span class="font-mono opacity-80 leading-none" style="font-size: ${8 * scale}px;">${el.weight}</span>` 
+                : ``;
+
+            card.innerHTML = `
+                <div class="flex justify-between items-center font-bold leading-none opacity-90">
+                    ${zHtml}
+                    ${qrIconHtml}
+                </div>
+                <div class="text-center my-auto">
+                    ${symbolHtml}
+                    ${nameHtml}
+                </div>
+                <div class="text-center leading-none">
+                    ${weightHtml}
+                </div>
+            `;
+
+            card.onclick = () => openModal(el);
+            return card;
+        }
+
+        function filterElements() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const selectedPhase = document.getElementById('phaseFilter').value;
+
+            document.querySelectorAll('.element-card').forEach(card => {
+                if(!card.dataset.number) return;
+
+                const name = card.dataset.name;
+                const symbol = card.dataset.symbol;
+                const num = card.dataset.number;
+                const cat = card.dataset.category;
+                const phase = card.dataset.phase;
+
+                const matchesQuery = !query || name.includes(query) || symbol.includes(query) || num === query;
+                const matchesCategory = !activeCategoryFilter || cat === activeCategoryFilter;
+                const matchesPhase = selectedPhase === 'all' || phase === selectedPhase;
+
+                if (matchesQuery && matchesCategory && matchesPhase) {
+                    card.style.opacity = '1';
+                    card.style.transform = 'scale(1)';
+                    card.style.pointerEvents = 'auto';
+                } else {
+                    card.style.opacity = '0.15';
+                    card.style.transform = 'scale(0.95)';
+                    card.style.pointerEvents = 'none';
+                }
+            });
+        }
+
+        function filterByCategory(catKey) {
+            const resetBtn = document.getElementById('resetCategoryFilter');
+            if (activeCategoryFilter === catKey) {
+                activeCategoryFilter = null;
+                resetBtn.classList.add('hidden');
+            } else {
+                activeCategoryFilter = catKey;
+                resetBtn.classList.remove('hidden');
+            }
+            filterElements();
+        }
+
+        function openModal(el) {
+            currentActiveElement = el;
+            const modal = document.getElementById('elementModal');
+            const modalCard = document.getElementById('modalCard');
+            const catInfo = currentTheme.categories[el.category] || { name: 'Khác', bg: '#9ca3af', text: '#ffffff' };
+
+            document.getElementById('modalAtomicNum').innerText = el.number;
+            document.getElementById('modalSymbol').innerText = el.symbol;
+            document.getElementById('modalMass').innerText = el.weight;
+            document.getElementById('modalName').innerText = `${el.name} (${el.symbol})`;
+            document.getElementById('modalLatinName').innerText = el.latin || '';
+            document.getElementById('modalCategoryBadge').innerText = catInfo.name;
+            
+            const badge = document.getElementById('modalCategoryBadge');
+            badge.style.backgroundColor = catInfo.bg;
+            badge.style.color = catInfo.text;
+
+            document.getElementById('modalGroupPeriod').innerHTML = `<i class="fa-solid fa-table-cells mr-1"></i> Nhóm <strong>${el.group}</strong> • Chu kỳ <strong>${el.period}</strong>`;
+
+            const phaseMap = { gas: 'Khí (Gas)', liquid: 'Lỏng (Liquid)', solid: 'Rắn (Solid)', synthetic: 'Nhân tạo' };
+            document.getElementById('modalPhase').innerHTML = `<i class="fa-solid fa-flask mr-1"></i> Trạng thái: <strong>${phaseMap[el.phase] || el.phase}</strong>`;
+
+            document.getElementById('modalElectron').innerText = el.electron || 'N/A';
+            document.getElementById('modalElectronegativity').innerText = el.electro || 'N/A';
+            document.getElementById('modalMelting').innerText = el.melt !== null && el.melt !== undefined ? `${el.melt} °C` : 'N/A';
+            document.getElementById('modalBoiling').innerText = el.boil !== null && el.boil !== undefined ? `${el.boil} °C` : 'N/A';
+            document.getElementById('modalDescription').innerText = el.desc || '';
+
+            // Hiển thị các thông tin bổ sung do người quản trị tự tạo.
+            const customView = document.getElementById('modalCustomFieldsContainer');
+            customView.innerHTML = '';
+            (Array.isArray(el.customFields) ? el.customFields : []).forEach(field => {
+                if (!field || (!String(field.label || '').trim() && !String(field.value || '').trim())) return;
+                const item = document.createElement('div');
+                item.className = 'p-2.5 bg-slate-50 dark:bg-slate-700/50 rounded-lg text-xs';
+                item.innerHTML = `<span class="text-slate-400 block"></span><span class="font-semibold break-words"></span>`;
+                item.children[0].innerText = field.label || 'Thông tin';
+                item.children[1].innerText = field.value || 'N/A';
+                customView.appendChild(item);
+            });
+
+            const defaultUrl = `https://vi.wikipedia.org/wiki/${encodeURIComponent(el.name)}`;
+            const urlInput = document.getElementById('customQrUrl');
+            urlInput.value = defaultUrl;
+
+            const headerBg = document.getElementById('modalHeaderBg');
+            headerBg.style.backgroundColor = catInfo.bg;
+            headerBg.style.color = catInfo.text;
+
+            generateQRCode(defaultUrl, el.symbol, el.name);
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalCard.classList.remove('scale-95');
+                modalCard.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('elementModal');
+            const modalCard = document.getElementById('modalCard');
+
+            modalCard.classList.remove('scale-100');
+            modalCard.classList.add('scale-95');
+            modal.classList.add('opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        function openEditModal(isNew = false) {
+            if (!isAdminRole) return;
+            isEditingMode = !isNew;
+            const modal = document.getElementById('editElementModal');
+            document.getElementById('editModalTitle').innerText = isNew ? 'Thêm Nguyên Tố Mới' : 'Chỉnh Sửa Nguyên Tố';
+
+            // Populate category dropdown
+            const catSelect = document.getElementById('editCategory');
+            catSelect.innerHTML = '';
+            Object.keys(currentTheme.categories).forEach(catKey => {
+                const opt = document.createElement('option');
+                opt.value = catKey;
+                opt.textContent = currentTheme.categories[catKey].name;
+                catSelect.appendChild(opt);
+            });
+
+            if (isNew) {
+                document.getElementById('editNum').value = elements.length + 1;
+                document.getElementById('editSymbol').value = '';
+                document.getElementById('editName').value = '';
+                document.getElementById('editLatin').value = '';
+                document.getElementById('editWeight').value = '0.00';
+                document.getElementById('editGroup').value = 1;
+                document.getElementById('editPeriod').value = 1;
+                document.getElementById('editPhase').value = 'solid';
+                document.getElementById('editElectron').value = '';
+                document.getElementById('editDesc').value = '';
+                renderEditCustomFields([]);
+            } else {
+                const el = currentActiveElement;
+                document.getElementById('editNum').value = el.number;
+                document.getElementById('editSymbol').value = el.symbol;
+                document.getElementById('editName').value = el.name;
+                document.getElementById('editLatin').value = el.latin || '';
+                document.getElementById('editWeight').value = el.weight;
+                document.getElementById('editGroup').value = el.group;
+                document.getElementById('editPeriod').value = el.period;
+                document.getElementById('editPhase').value = el.phase;
+                document.getElementById('editCategory').value = el.category;
+                document.getElementById('editElectron').value = el.electron || '';
+                document.getElementById('editDesc').value = el.desc || '';
+                renderEditCustomFields(el.customFields || []);
+            }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function renderEditCustomFields(fields = []) {
+            const container = document.getElementById('editCustomFieldsContainer');
+            const empty = document.getElementById('editCustomFieldsEmpty');
+            container.innerHTML = '';
+            const safeFields = Array.isArray(fields) ? fields : [];
+
+            safeFields.forEach((field, index) => {
+                const row = document.createElement('div');
+                row.className = 'grid grid-cols-[1fr_1.4fr_auto] gap-2 items-start';
+                row.dataset.index = index;
+                row.innerHTML = `
+                    <input type="text" class="custom-field-label w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700" placeholder="Tên thông tin" value="">
+                    <input type="text" class="custom-field-value w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700" placeholder="Giá trị" value="">
+                    <button type="button" class="remove-custom-field p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded" title="Xoá thông tin này">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>`;
+                row.querySelector('.custom-field-label').value = field?.label || '';
+                row.querySelector('.custom-field-value').value = field?.value || '';
+                row.querySelector('.remove-custom-field').onclick = () => {
+                    row.remove();
+                    updateCustomFieldsEmptyState();
+                };
+                container.appendChild(row);
+            });
+            updateCustomFieldsEmptyState();
+        }
+
+        function updateCustomFieldsEmptyState() {
+            const container = document.getElementById('editCustomFieldsContainer');
+            const empty = document.getElementById('editCustomFieldsEmpty');
+            empty.classList.toggle('hidden', container.children.length > 0);
+        }
+
+        function collectEditCustomFields() {
+            return Array.from(document.querySelectorAll('#editCustomFieldsContainer > div')).map(row => ({
+                label: row.querySelector('.custom-field-label')?.value.trim() || '',
+                value: row.querySelector('.custom-field-value')?.value.trim() || ''
+            })).filter(field => field.label || field.value);
+        }
+
+        function addEditCustomField(label = '', value = '') {
+            const container = document.getElementById('editCustomFieldsContainer');
+            const row = document.createElement('div');
+            row.className = 'grid grid-cols-[1fr_1.4fr_auto] gap-2 items-start';
+            row.innerHTML = `
+                <input type="text" class="custom-field-label w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700" placeholder="Tên thông tin">
+                <input type="text" class="custom-field-value w-full p-2 border rounded border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700" placeholder="Giá trị">
+                <button type="button" class="remove-custom-field p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded" title="Xoá thông tin này">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>`;
+            row.querySelector('.custom-field-label').value = label;
+            row.querySelector('.custom-field-value').value = value;
+            row.querySelector('.remove-custom-field').onclick = () => {
+                row.remove();
+                updateCustomFieldsEmptyState();
+            };
+            container.appendChild(row);
+            updateCustomFieldsEmptyState();
+            row.querySelector('.custom-field-label').focus();
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editElementModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function generateQRCode(url, symbol, name) {
+            const qrContainer = document.getElementById('qrcodeCanvas');
+            qrContainer.innerHTML = '';
+
+            new QRCode(qrContainer, {
+                text: url,
+                width: 140,
+                height: 140,
+                colorDark: "#0f172a",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            document.getElementById('qrCodeCaption').innerText = `${symbol} - ${name}`;
+            document.getElementById('previewLinkBtn').href = url;
+        }
+
+        function downloadQRCode() {
+            const qrContainer = document.getElementById('qrcodeCanvas');
+            const img = qrContainer.querySelector('img') || qrContainer.querySelector('canvas');
+            if (!img) return;
+
+            let imageSrc = (img.tagName === 'IMG') ? img.src : img.toDataURL("image/png");
+
+            const downloadLink = document.createElement('a');
+            downloadLink.href = imageSrc;
+            downloadLink.download = `QR_${currentActiveElement.symbol}_${currentActiveElement.name}.png`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            downloadLink.remove();
+        }
+
+        // Initialize App Event Listeners
+        // Responsive View: trên di động chỉ thu nhỏ toàn bộ giao diện, không thay đổi cấu trúc.
+        const updateResponsiveView = () => {
+            const isMobileViewport = window.matchMedia('(max-width: 767px)').matches;
+            document.body.classList.toggle('mobile-view', isMobileViewport);
+
+            if (isMobileViewport) {
+                // 1200px là chiều rộng cơ sở để bảo toàn nguyên trạng bố cục hiện tại.
+                const scale = Math.min(1, window.innerWidth / 1200);
+                document.body.style.setProperty('--mobile-view-scale', scale.toFixed(4));
+            } else {
+                document.body.style.removeProperty('--mobile-view-scale');
+            }
+        };
+
+        updateResponsiveView();
+        window.addEventListener('resize', updateResponsiveView, { passive: true });
+        window.addEventListener('orientationchange', updateResponsiveView, { passive: true });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRoleUI();
+            initStudioControls();
+            renderLegend();
+            renderTable();
+
+            // Search and filter events
+            document.getElementById('searchInput').oninput = filterElements;
+            document.getElementById('phaseFilter').onchange = filterElements;
+            document.getElementById('resetCategoryFilter').onclick = () => {
+                activeCategoryFilter = null;
+                document.getElementById('resetCategoryFilter').classList.add('hidden');
+                filterElements();
+            };
+
+            // Details Modal Actions
+            document.getElementById('closeModalBtn').onclick = closeModal;
+            document.getElementById('editCurrentElemBtn').onclick = () => { closeModal(); openEditModal(false); };
+            document.getElementById('deleteCurrentElemBtn').onclick = () => {
+                if (confirm(`Bạn có chắc muốn xóa nguyên tố ${currentActiveElement.name} (${currentActiveElement.symbol})?`)) {
+                    elements = elements.filter(e => e.number !== currentActiveElement.number);
+                    saveElementsState();
+                    renderTable();
+                    closeModal();
+                }
+            };
+
+            // QR Actions
+            document.getElementById('updateQrBtn').onclick = () => {
+                const newUrl = document.getElementById('customQrUrl').value.trim();
+                if (newUrl) generateQRCode(newUrl, currentActiveElement.symbol, currentActiveElement.name);
+            };
+            document.getElementById('downloadQrBtn').onclick = downloadQRCode;
+
+            // Add/Edit Form submit
+            document.getElementById('elementForm').onsubmit = (e) => {
+                e.preventDefault();
+                if (!isAdminRole) return;
+                const num = parseInt(document.getElementById('editNum').value);
+                const elemData = {
+                    number: num,
+                    symbol: document.getElementById('editSymbol').value.trim(),
+                    name: document.getElementById('editName').value.trim(),
+                    latin: document.getElementById('editLatin').value.trim(),
+                    weight: document.getElementById('editWeight').value.trim(),
+                    group: parseInt(document.getElementById('editGroup').value),
+                    period: parseInt(document.getElementById('editPeriod').value),
+                    phase: document.getElementById('editPhase').value,
+                    category: document.getElementById('editCategory').value,
+                    electron: document.getElementById('editElectron').value.trim(),
+                    desc: document.getElementById('editDesc').value.trim(),
+                    customFields: collectEditCustomFields()
+                };
+
+                if (isEditingMode) {
+                    const idx = elements.findIndex(e => e.number === num);
+                    if (idx !== -1) elements[idx] = elemData;
+                } else {
+                    elements.push(elemData);
+                }
+
+                saveElementsState();
+                initStudioControls();
+                renderTable();
+                closeEditModal();
+            };
+
+            document.getElementById('addNewElemBtn').onclick = () => openEditModal(true);
+            document.getElementById('addCustomFieldBtn').onclick = () => addEditCustomField();
+            document.getElementById('closeEditModalBtn').onclick = closeEditModal;
+            document.getElementById('cancelEditBtn').onclick = closeEditModal;
+
+            // Category Legend Modal
+            const catModal = document.getElementById('categoryModal');
+            document.getElementById('addCategoryBtn').onclick = () => {
+                catModal.classList.remove('hidden');
+                setTimeout(() => catModal.classList.remove('opacity-0'), 10);
+            };
+            document.getElementById('closeCategoryModalBtn').onclick = () => {
+                catModal.classList.add('opacity-0');
+                setTimeout(() => catModal.classList.add('hidden'), 300);
+            };
+            document.getElementById('cancelCatBtn').onclick = () => {
+                catModal.classList.add('opacity-0');
+                setTimeout(() => catModal.classList.add('hidden'), 300);
+            };
+
+            document.getElementById('categoryForm').onsubmit = (e) => {
+                e.preventDefault();
+                const key = document.getElementById('catKeyInput').value.trim().toLowerCase().replace(/\s+/g, '_');
+                const name = document.getElementById('catNameInput').value.trim();
+                const bg = document.getElementById('catBgInput').value;
+                const text = document.getElementById('catTextInput').value;
+
+                currentTheme.categories[key] = { name, bg, text };
+                renderLegend();
+                renderTable();
+
+                catModal.classList.add('opacity-0');
+                setTimeout(() => catModal.classList.add('hidden'), 300);
+            };
+
+            // Role Switcher Modal
+            const roleModal = document.getElementById('roleModal');
+            document.getElementById('switchRoleBtn').onclick = () => {
+                if (isAdminRole) {
+                    isAdminRole = false;
+                    updateRoleUI();
+                    renderLegend();
+                } else {
+                    roleModal.classList.remove('hidden');
+                    setTimeout(() => roleModal.classList.remove('opacity-0'), 10);
+                }
+            };
+
+            document.getElementById('cancelRoleBtn').onclick = () => {
+                roleModal.classList.add('opacity-0');
+                setTimeout(() => roleModal.classList.add('hidden'), 300);
+            };
+
+            document.getElementById('submitRoleBtn').onclick = () => {
+                const pass = document.getElementById('rolePasswordInput').value;
+                if (pass === '10a15ntmk') {
+                    isAdminRole = true;
+                    updateRoleUI();
+                    renderLegend();
+                    roleModal.classList.add('opacity-0');
+                    setTimeout(() => roleModal.classList.add('hidden'), 300);
+                    document.getElementById('rolePasswordInput').value = '';
+                } else {
+                    alert('Mật khẩu quản trị không chính xác!');
+                }
+            };
+
+            // Export PNG Board
+            document.getElementById('exportBoardImgBtn').onclick = () => {
+                const captureArea = document.getElementById('boardCaptureArea');
+                html2canvas(captureArea, { scale: 2, useCORS: true }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'Bang_Tuan_Hoan_Hoa_Hoc.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            };
+
+            // Studio Drawer Toggle
+            const studioDrawer = document.getElementById('designStudioDrawer');
+            document.getElementById('toggleStudioBtn').onclick = () => studioDrawer.classList.toggle('hidden');
+            document.getElementById('closeStudioBtn').onclick = () => studioDrawer.classList.add('hidden');
+
+            // Dark/Light Theme
+            document.getElementById('themeToggleBtn').onclick = () => {
+                document.documentElement.classList.toggle('dark');
+            };
+        });
+    </script>
+</body>
+</html>
