@@ -6,6 +6,25 @@
     <title>Bảng Tuần Hoàn Các Nguyên Tố Hóa Học</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+   <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import { getDatabase } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBmU_Nv4hf8aG2uznSGwYWhjB1B56jgrmM",
+    authDomain: "bangtuanhoan-e8904.firebaseapp.com",
+    databaseURL: "https://bangtuanhoan-e8904-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "bangtuanhoan-e8904",
+    storageBucket: "bangtuanhoan-e8904.firebasestorage.app",
+    messagingSenderId: "100817740519",
+    appId: "1:100817740519:web:2cbb9e625be77017793842",
+    measurementId: "G-SYX3EJV48Y"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
+  window.firebaseDatabase = database;
+   </script>
     <script>
         tailwind.config = {
             darkMode: 'class',
